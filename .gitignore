@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Distribution / packaging
+*.egg-info/
+.eggs/
+*.whl
+
+# Virtual environments
+env/
+venv/
+ENV/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Ignore invoice PDFs for now
+invoices/*.pdf
