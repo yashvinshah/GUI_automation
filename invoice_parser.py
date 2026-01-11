@@ -38,19 +38,23 @@ def parse_invoice(pdf_file: str) -> dict:
         "total_amount": None,
     }
 
-    # Simple regex rules (edit per invoice format)
-    rules = {
-    "invoice_number": r"(Invoice\s*(Number|No\.?|#)\s*[:\-]?\s*)([^\n\r]+)",
+    # Invoice number
+    invoice_number_pattern = r"(Invoice\s*(Number|No\.?|#)\s*[:\-]?\s*)([^\n\r]+)"
+    match = re.search(invoice_number_pattern, text, re.IGNORECASE)
+    if match:
+        data["invoice_number"] = match.groups()[-1].strip()
 
-    "invoice_date": r"(Invoice\s*Date\s*[:\-]?\s*)([^\n\r]+)",
+    # Invoice date
+    invoice_date_pattern = r"(Invoice\s*Date\s*[:\-]?\s*)([^\n\r]+)"
+    match = re.search(invoice_date_pattern, text, re.IGNORECASE)
+    if match:
+        data["invoice_date"] = match.groups()[-1].strip()
 
-    "total_amount": r"(Total|Amount\s*Due)\s*[:$]?\s*([^\n\r]+)",
-}
-
-    for field, pattern in rules.items():
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            data[field] = match.groups()[-1]
+    # Amount - look for "Total" or "Amount" followed by numbers
+    amount_pattern = r"(Total|Amount)\s*[:\-]?\s*(?:INR|USD|\$|Rs\.?|₹)?\s*([\d,]+(?:\.\d{1,2})?)"
+    match = re.search(amount_pattern, text, re.IGNORECASE)
+    if match:
+        data["total_amount"] = match.group(2).replace(',', '').strip()
 
     return data
 
