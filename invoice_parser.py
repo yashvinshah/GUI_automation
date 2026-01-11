@@ -39,22 +39,34 @@ def parse_invoice(pdf_file: str) -> dict:
     }
 
     # Invoice number
+    print("Searching for invoice number...")
     invoice_number_pattern = r"(Invoice\s*(Number|No\.?|#)\s*[:\-]?\s*)([^\n\r]+)"
     match = re.search(invoice_number_pattern, text, re.IGNORECASE)
     if match:
         data["invoice_number"] = match.groups()[-1].strip()
+        print(f"  ✓ Found invoice number: {data['invoice_number']}")
+    else:
+        print("  ✗ Invoice number not found")
 
     # Invoice date
+    print("Searching for invoice date...")
     invoice_date_pattern = r"(Invoice\s*Date\s*[:\-]?\s*)([^\n\r]+)"
     match = re.search(invoice_date_pattern, text, re.IGNORECASE)
     if match:
         data["invoice_date"] = match.groups()[-1].strip()
+        print(f"  ✓ Found invoice date: {data['invoice_date']}")
+    else:
+        print("  ✗ Invoice date not found")
 
     # Amount - look for "Total" or "Amount" followed by numbers
+    print("Searching for total amount...")
     amount_pattern = r"(Total|Amount)\s*[:\-]?\s*(?:INR|USD|\$|Rs\.?|₹)?\s*([\d,]+(?:\.\d{1,2})?)"
     match = re.search(amount_pattern, text, re.IGNORECASE)
     if match:
         data["total_amount"] = match.group(2).replace(',', '').strip()
+        print(f"  ✓ Found total amount: {data['total_amount']}")
+    else:
+        print("  ✗ Total amount not found")
 
     return data
 

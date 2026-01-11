@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from invoice_parser import parse_invoice
 from gui_excel_worker import process_all_invoices, process_invoice_excel
-from gui_googlesheet_worker import process_invoice_google_sheet
+from gui_googlesheet_worker import process_all_invoices as process_all_invoices_google, process_invoice_google_sheet
 
 # Directory with invoice PDFs
 INVOICE_DIR = "invoices/"
@@ -35,16 +35,20 @@ def main():
     # Step 2: Process all invoices in a single Excel session
     excel_results = process_all_invoices(all_invoices_data)
 
-    # Step 3: Build results for logging
+    # Step 3: Process all invoices in Google Sheets
+    google_results = process_all_invoices_google(all_invoices_data)
+
+    # Step 4: Build results for logging
     for invoice_data in all_invoices_data:
         invoice_number = invoice_data.get("invoice_number", "unknown")
         excel_ok = excel_results.get(invoice_number, False)
+        google_ok = google_results.get(invoice_number, False)
         
         results.append({
             "invoice_file": invoice_data.get("invoice_file", "unknown"),
             "invoice_number": invoice_number,
             "excel_status": excel_ok,
-            # "google_sheet_status": google_ok
+            "google_sheet_status": google_ok
         })
 
 if __name__ == "__main__":
