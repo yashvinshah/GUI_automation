@@ -47,9 +47,5 @@ def main():
             # "google_sheet_status": google_ok
         })
 
-    # Save log
-    with open("automation_log.json", "w") as f:
-        json.dump(results, f, indent=2)
-
 if __name__ == "__main__":
     main()
