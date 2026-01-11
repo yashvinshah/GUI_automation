@@ -1,14 +1,26 @@
 [
   {
+    "invoice_file": "invoice3.pdf",
+    "invoice_number": "475503",
+    "invoice_date": "December 9, 2024",
+    "total_amount": "2784.15"
+  },
+  {
     "invoice_file": "invoice2.pdf",
     "invoice_number": "032161050010677",
-    "invoice_date": "15-06-2025 18:24:49",
-    "total_amount": "2867.90"
+    "invoice_date": "15-06-2025",
+    "total_amount": "2867.9"
   },
   {
     "invoice_file": "invoice1.pdf",
     "invoice_number": "KS/JAN/2025/481",
     "invoice_date": "29 January 2025",
-    "total_amount": "3540.00"
+    "total_amount": "3540.0"
+  },
+  {
+    "invoice_file": "invoice5.pdf",
+    "invoice_number": "112-1396480-5002621",
+    "invoice_date": "October 27, 2025",
+    "total_amount": "68.53"
   }
 ]

@@ -11,8 +11,9 @@ from typing import Optional, Tuple, Callable
 import subprocess
 import platform
 
-# Configure logging
-LOG_DIR = Path(__file__).parent / "logs"
+# Configure logging - use project root directory
+PROJECT_ROOT = Path(__file__).parent.parent
+LOG_DIR = PROJECT_ROOT / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
 logging.basicConfig(
@@ -25,8 +26,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Screenshot directory for debugging
-SCREENSHOT_DIR = Path(__file__).parent / "screenshots"
+# Screenshot directory for debugging - use same logs directory
+SCREENSHOT_DIR = LOG_DIR
 SCREENSHOT_DIR.mkdir(exist_ok=True)
 
 

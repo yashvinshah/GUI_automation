@@ -2,8 +2,8 @@ import sys
 import json
 from pathlib import Path
 from invoice_parser import parse_invoice
-from gui_excel_worker import process_all_invoices, process_invoice_excel
-from gui_googlesheet_worker import process_all_invoices as process_all_invoices_google, process_invoice_google_sheet
+from workflows.excel_workflow import process_all_invoices, process_invoice_excel
+from workflows.google_sheet_workflow import process_all_invoices as process_all_invoices_google, process_invoice_google_sheet
 
 # Directory with invoice PDFs
 INVOICE_DIR = "invoices/"

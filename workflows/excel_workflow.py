@@ -1,54 +1,18 @@
-import subprocess
 import os
 import time
 import logging
-import re
 from pathlib import Path
 from typing import List, Dict
-import pyautogui
-import platform
-from gui_utils import wait, press, type_text
-from window_manager import WindowManager
+from gui_automation.gui_utils import wait, press, type_text
+from gui_automation.window_manager import WindowManager
+from gui_automation import GUI
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-EXCEL_FILE_PATH = "/Users/nimeshshah/Desktop/NCSU/GUI automation /Invoices.xlsx"
+EXCEL_FILE_PATH = "Enter your excel worksheet path here"
 window_mgr = WindowManager("Microsoft Excel", max_retries=3, wait_timeout=10.0)
 _excel_opened = False
-
-
-def extract_amount_numbers(amount_str: str) -> str:
-    if not amount_str or amount_str == "null" or str(amount_str).lower() == "none":
-        return ""
-    
-    pattern = r'(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d+\.\d{1,2}|\d+)'
-    matches = re.findall(pattern, str(amount_str))
-    
-    if matches:
-        amount = matches[-1].replace(',', '')
-        return amount
-    
-    pattern_simple = r'(\d+\.?\d*)'
-    match = re.search(pattern_simple, str(amount_str))
-    if match:
-        return match.group(1)
-    
-    return ""
-
-
-def clean_date(date_str: str) -> str:
-    if not date_str or date_str == "null" or str(date_str).lower() == "none":
-        return ""
-    
-    date_str = str(date_str).strip()
-    
-    if " " in date_str:
-        parts = date_str.split(" ")
-        if len(parts) >= 2:
-            return parts[0]
-    
-    return date_str
 
 
 def open_excel_file() -> bool:
@@ -64,7 +28,7 @@ def open_excel_file() -> bool:
     logger.info(f"Opening Excel file: {EXCEL_FILE_PATH}")
     
     try:
-        subprocess.Popen(["open", "-a", "Microsoft Excel", EXCEL_FILE_PATH])
+        GUI.open_application_with_file("Microsoft Excel", EXCEL_FILE_PATH)
         
         if window_mgr.wait_for_window_ready(timeout=15.0):
             _excel_opened = True
@@ -117,26 +81,7 @@ def find_invoice_row(invoice_number: str) -> bool:
         
         wait(0.3)
         
-        if platform.system() == "Darwin":
-            try:
-                script = '''
-                tell application "Microsoft Excel"
-                    activate
-                end tell
-                delay 0.2
-                tell application "System Events"
-                    tell process "Microsoft Excel"
-                        keystroke "f" using command down
-                    end tell
-                end tell
-                '''
-                subprocess.run(["osascript", "-e", script], check=True, timeout=3)
-            except Exception as e:
-                logger.warning(f"AppleScript Cmd+F failed: {e}")
-                ensure_excel_focus()
-                wait(0.2)
-                press("command", "f")
-        else:
+        if not GUI.send_keystroke_to_app("Microsoft Excel", "f", ["command"]):
             ensure_excel_focus()
             wait(0.2)
             press("command", "f")
@@ -282,11 +227,16 @@ def process_all_invoices(invoices_data: List[Dict]) -> Dict[str, bool]:
 
 def process_invoice_excel(invoice_data: Dict) -> bool:
     invoice_number = invoice_data.get("invoice_number")
-    amount_raw = invoice_data.get("total_amount", "")
-    date_raw = invoice_data.get("invoice_date", "")
+    amount = invoice_data.get("total_amount", "")
+    date = invoice_data.get("invoice_date", "")
     
-    amount = extract_amount_numbers(str(amount_raw)) if amount_raw else ""
-    date = clean_date(str(date_raw)) if date_raw else ""
+    if amount is None:
+        amount = ""
+    if date is None:
+        date = ""
+    
+    amount = str(amount)
+    date = str(date)
     
     if not invoice_number:
         logger.error("Invoice number missing")

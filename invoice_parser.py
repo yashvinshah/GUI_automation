@@ -3,7 +3,13 @@ import pdfplumber
 import pytesseract
 from pathlib import Path
 
+def normalize_text(text: str) -> str:
+    text = text.replace("\u00a0", " ")  # non-breaking spaces
+    text = re.sub(r"[ \t]+", " ", text) # collapse spaces
+    text = re.sub(r"\n+", "\n", text)   # collapse newlines
+    return text
 
+# ---------------- Text Extraction ----------------
 def extract_text(pdf_path: Path) -> str:
     text = []
 
@@ -15,7 +21,6 @@ def extract_text(pdf_path: Path) -> str:
 
     combined_text = "\n".join(text)
 
-    # Fallback to OCR if text extraction fails
     if len(combined_text.strip()) < 50:
         ocr_text = []
         with pdfplumber.open(pdf_path) as pdf:
@@ -27,53 +32,79 @@ def extract_text(pdf_path: Path) -> str:
     return combined_text
 
 
+# ---------------- Invoice Number ----------------
+def extract_invoice_number(text: str):
+    text = normalize_text(text)
+
+    patterns = [
+        r"(I\s*n\s*v\s*o\s*i\s*c\s*e\s*(?:No\.?|Number|#))\s*[:\-]?\s*([A-Za-z0-9\-\/]+)",
+        r"(Order\s*(?:No\.?|Number|#|ID))\s*[:\-]?\s*([A-Za-z0-9\-\/]+)",
+        r"(Reference\s*(?:No\.?|Number))\s*[:\-]?\s*([A-Za-z0-9\-\/]+)",
+        r"(Document\s*(?:No\.?|Number))\s*[:\-]?\s*([A-Za-z0-9\-\/]+)",
+    ]
+
+    for p in patterns:
+        for m in re.finditer(p, text, re.IGNORECASE):
+            value = m.group(2)
+            if any(c.isdigit() for c in value):
+                return value
+
+    return None
+
+# ---------------- Invoice Date ----------------
+def extract_invoice_date(text: str):
+    date_patterns = [
+        r"(Invoice\s*Date|Date\s*of\s*Issue|Issue\s*Date|Order\s*Placed|Order\s*Date|Date)"
+        r"\s*[:\-]?\s*"
+        r"("
+        r"\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}"
+        r"|\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}"
+        r"|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4}"
+        r"|\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}"
+        r")"
+    ]
+
+    for p in date_patterns:
+        m = re.search(p, text, re.IGNORECASE)
+        if m:
+            return m.group(2)
+
+    return None
+
+
+# ---------------- Amount ----------------
+def extract_total_amount(text: str):
+    amount_pattern = (
+        r"(Total|Grand\s*Total|Net\s*Amount|Amount|Balance\s*Due)"
+        r"(?:\s*\(.*?\))?"
+        r"\s*[:\-]?\s*"
+        r"(?:INR|USD|AED|EUR|\$|Rs\.?|₹)?\s*"
+        r"([\d,]+(?:\.\d{1,2})?)"
+    )
+
+    amounts = []
+
+    for match in re.finditer(amount_pattern, text, re.IGNORECASE):
+        amount_str = match.group(2)   # 👈 second capture group
+        amounts.append(float(amount_str.replace(",", "")))
+
+    return str(max(amounts)) if amounts else None
+
+
+# ---------------- Main Parser ----------------
 def parse_invoice(pdf_file: str) -> dict:
-    pdf_path = Path(pdf_file)
-    text = extract_text(pdf_path)
+    text = extract_text(Path(pdf_file))
 
-    data = {
-        "invoice_file": pdf_path.name,
-        "invoice_number": None,
-        "invoice_date": None,
-        "total_amount": None,
+    return {
+        "invoice_file": Path(pdf_file).name,
+        "invoice_number": extract_invoice_number(text),
+        "invoice_date": extract_invoice_date(text),
+        "total_amount": extract_total_amount(text),
     }
-
-    # Invoice number
-    print("Searching for invoice number...")
-    invoice_number_pattern = r"(Invoice\s*(Number|No\.?|#)\s*[:\-]?\s*)([^\n\r]+)"
-    match = re.search(invoice_number_pattern, text, re.IGNORECASE)
-    if match:
-        data["invoice_number"] = match.groups()[-1].strip()
-        print(f"  ✓ Found invoice number: {data['invoice_number']}")
-    else:
-        print("  ✗ Invoice number not found")
-
-    # Invoice date
-    print("Searching for invoice date...")
-    invoice_date_pattern = r"(Invoice\s*Date\s*[:\-]?\s*)([^\n\r]+)"
-    match = re.search(invoice_date_pattern, text, re.IGNORECASE)
-    if match:
-        data["invoice_date"] = match.groups()[-1].strip()
-        print(f"  ✓ Found invoice date: {data['invoice_date']}")
-    else:
-        print("  ✗ Invoice date not found")
-
-    # Amount - look for "Total" or "Amount" followed by numbers
-    print("Searching for total amount...")
-    amount_pattern = r"(Total|Amount)\s*[:\-]?\s*(?:INR|USD|\$|Rs\.?|₹)?\s*([\d,]+(?:\.\d{1,2})?)"
-    match = re.search(amount_pattern, text, re.IGNORECASE)
-    if match:
-        data["total_amount"] = match.group(2).replace(',', '').strip()
-        print(f"  ✓ Found total amount: {data['total_amount']}")
-    else:
-        print("  ✗ Total amount not found")
-
-    return data
 
 
 if __name__ == "__main__":
-    import sys
-    import json
+    import sys, json
 
     if len(sys.argv) != 2:
         print("Usage: python invoice_parser.py <invoice.pdf>")

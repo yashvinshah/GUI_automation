@@ -1,17 +1,14 @@
-import subprocess
-import os
 import time
 import logging
-import platform
 from typing import List, Dict
-import pyautogui
-from gui_utils import wait, press, type_text
-from window_manager import WindowManager
+from gui_automation.gui_utils import wait, press, type_text
+from gui_automation.window_manager import WindowManager
+from gui_automation import GUI
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1K2nESFNfp3zDcM5x-RDCv_pcpdY2ghtcFvillmggVBw/edit?gid=0#gid=0"
+GOOGLE_SHEET_URL = "Enter your google sheet url here"
 window_mgr = WindowManager("Google Chrome", max_retries=3, wait_timeout=10.0)
 _sheet_opened = False
 
@@ -25,7 +22,7 @@ def open_google_sheet() -> bool:
     logger.info(f"Opening Google Sheet: {GOOGLE_SHEET_URL}")
     
     try:
-        subprocess.Popen(["open", "-a", "Google Chrome", GOOGLE_SHEET_URL])
+        GUI.open_url_in_browser("Google Chrome", GOOGLE_SHEET_URL)
         
         if window_mgr.wait_for_window_ready(timeout=15.0):
             _sheet_opened = True
@@ -78,26 +75,7 @@ def find_invoice_row(invoice_number: str) -> bool:
         
         wait(0.3)
         
-        if platform.system() == "Darwin":
-            try:
-                script = '''
-                tell application "Google Chrome"
-                    activate
-                end tell
-                delay 0.2
-                tell application "System Events"
-                    tell process "Google Chrome"
-                        keystroke "f" using command down
-                    end tell
-                end tell
-                '''
-                subprocess.run(["osascript", "-e", script], check=True, timeout=3)
-            except Exception as e:
-                logger.warning(f"AppleScript Cmd+F failed: {e}")
-                ensure_sheet_focus()
-                wait(0.2)
-                press("command", "f")
-        else:
+        if not GUI.send_keystroke_to_app("Google Chrome", "f", ["command"]):
             ensure_sheet_focus()
             wait(0.2)
             press("command", "f")

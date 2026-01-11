@@ -22,3 +22,5 @@ ENV/
 
 # Ignore invoice PDFs for now
 invoices/*.pdf
+# logs/*
+screenshots/*    
