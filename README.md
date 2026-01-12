@@ -4,7 +4,7 @@ Automated invoice processing system that extracts data from PDF invoices and fil
 
 ##Demo Video
 
-https://github.com/yashvinshah/GUI_automation/releases/download/v1.0.0/Invoice_video.2.mp4
+https://github.com/yashvinshah/GUI_automation/releases/download/v1.0.0/video.mp4
 
 ## Software Prerequisites
 
