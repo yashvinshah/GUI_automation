@@ -2,7 +2,7 @@
 
 Automated invoice processing system that extracts data from PDF invoices and fills Excel and Google Sheets.
 
-##Demo Video
+## Demo Video
 
 https://github.com/yashvinshah/GUI_automation/releases/download/v1.0.0/video.mp4
 
