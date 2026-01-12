@@ -1,11 +1,14 @@
 # Invoice Processing Automation
 
-Automated invoice processing system that extracts data from PDF invoices and populates Excel and Google Sheets.
+Automated invoice processing system that extracts data from PDF invoices and fills Excel and Google Sheets.
+
+##Demo Video
+https://github.com/yashvinshah/GUI_automation/releases/download/v1.0.0/Invoice_Video.mp4.sb-d4be202e-HCP3KM
 
 ## Software Prerequisites
 
 ### Required Software
-- **Python 3.7+** - Python programming language
+- **Python 3.7 or higher+** - Python programming language
 - **Microsoft Excel** (for Excel workflow) - Must be installed and accessible
 - **Google Chrome** (for Google Sheets workflow) - Must be installed and accessible
 
@@ -34,10 +37,10 @@ Automated invoice processing system that extracts data from PDF invoices and pop
 
 3. **Verify installation:**
    ```bash
-   python3 -c "import pdfplumber, pytesseract, pyautogui; print('All dependencies installed successfully')"
+   python -c "import pdfplumber, pytesseract, pyautogui; print('All dependencies installed successfully')"
    ```
 
-## How to Prepare Example Invoice PDFs
+## How to Prepare Invoice PDFs
 
 1. **Create the invoices directory** (if it doesn't exist):
    ```bash
@@ -48,19 +51,11 @@ Automated invoice processing system that extracts data from PDF invoices and pop
    - Place all invoice PDF files in the `invoices/` directory
    - Supported formats: `.pdf`, `.PDF`
    - The parser looks for:
-     - Invoice Number (pattern: "Invoice Number", "Invoice No", "Invoice #")
-     - Invoice Date (pattern: "Invoice Date")
-     - Total Amount (pattern: "Total" or "Amount" followed by numbers)
+     - Invoice Number (pattern: "Invoice Number", "Order No", "Invoice #", "Order #" etc)
+     - Invoice Date (pattern: "Invoice Date", "Date of issue", "Order placed" etc)
+     - Total Amount (pattern: "Total", "Amount", "Value" followed by numbers)
 
-3. **Example invoice structure:**
-   Your invoices should contain text like:
-   ```
-   Invoice Number: INV-2025-001
-   Invoice Date: 15-06-2025
-   Total: 2867.90
-   ```
-
-4. **Configure file paths** (if needed):
+3. **Configure file paths** (if needed):
    - **Excel file path**: Edit `workflows/excel_workflow.py` and update `EXCEL_FILE_PATH`
    - **Google Sheets URL**: Edit `workflows/google_sheet_workflow.py` and update `GOOGLE_SHEET_URL`
 
