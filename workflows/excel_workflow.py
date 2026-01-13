@@ -10,11 +10,12 @@ from gui_automation import GUI
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Enter required file path 
 EXCEL_FILE_PATH = "Enter your excel worksheet path here"
 window_mgr = WindowManager("Microsoft Excel", max_retries=3, wait_timeout=10.0)
 _excel_opened = False
 
-
+# open excel file
 def open_excel_file() -> bool:
     global _excel_opened
     
@@ -52,7 +53,7 @@ def open_excel_file() -> bool:
         window_mgr.take_screenshot("excel_open_error")
         return False
 
-
+# to ensure focus is maintained on the excel window
 def ensure_excel_focus() -> bool:
     if not window_mgr.focus_application():
         logger.warning("Failed to focus Excel application")
@@ -70,7 +71,7 @@ def type_text_to_excel(text: str) -> bool:
     type_text(str(text))
     return True
 
-
+# to find invoice row by invoice number
 def find_invoice_row(invoice_number: str) -> bool:
     logger.info(f"Searching for invoice number: {invoice_number}")
     
@@ -115,7 +116,7 @@ def find_invoice_row(invoice_number: str) -> bool:
             pass
         return False
 
-
+# to update amount and date cells
 def update_cells(amount: str, date: str) -> bool:
     logger.info(f"Updating cells - Amount: {amount}, Date: {date}")
     
@@ -165,7 +166,7 @@ def update_cells(amount: str, date: str) -> bool:
         window_mgr.take_screenshot("update_cells_error")
         return False
 
-
+# to process all invoices in a single excel session
 def process_all_invoices(invoices_data: List[Dict]) -> Dict[str, bool]:
     results = {}
     
@@ -224,37 +225,37 @@ def process_all_invoices(invoices_data: List[Dict]) -> Dict[str, bool]:
     logger.info(f"Completed processing {len(invoices_data)} invoices")
     return results
 
-
-def process_invoice_excel(invoice_data: Dict) -> bool:
-    invoice_number = invoice_data.get("invoice_number")
-    amount = invoice_data.get("total_amount", "")
-    date = invoice_data.get("invoice_date", "")
+# # to process a single invoice in excel
+# def process_invoice_excel(invoice_data: Dict) -> bool:
+#     invoice_number = invoice_data.get("invoice_number")
+#     amount = invoice_data.get("total_amount", "")
+#     date = invoice_data.get("invoice_date", "")
     
-    if amount is None:
-        amount = ""
-    if date is None:
-        date = ""
+#     if amount is None:
+#         amount = ""
+#     if date is None:
+#         date = ""
     
-    amount = str(amount)
-    date = str(date)
+#     amount = str(amount)
+#     date = str(date)
     
-    if not invoice_number:
-        logger.error("Invoice number missing")
-        return False
+#     if not invoice_number:
+#         logger.error("Invoice number missing")
+#         return False
     
-    logger.info(f"Processing invoice: {invoice_number}, Amount: {amount}, Date: {date}")
+#     logger.info(f"Processing invoice: {invoice_number}, Amount: {amount}, Date: {date}")
     
-    if not ensure_excel_focus():
-        logger.error("Excel not focused")
-        return False
+#     if not ensure_excel_focus():
+#         logger.error("Excel not focused")
+#         return False
     
-    if not find_invoice_row(invoice_number):
-        logger.warning(f"Invoice {invoice_number} not found")
-        return False
+#     if not find_invoice_row(invoice_number):
+#         logger.warning(f"Invoice {invoice_number} not found")
+#         return False
     
-    if not update_cells(amount, date):
-        logger.error(f"Failed to update cells for invoice {invoice_number}")
-        return False
+#     if not update_cells(amount, date):
+#         logger.error(f"Failed to update cells for invoice {invoice_number}")
+#         return False
     
-    logger.info(f"Successfully processed invoice: {invoice_number}")
-    return True
+#     logger.info(f"Successfully processed invoice: {invoice_number}")
+#     return True

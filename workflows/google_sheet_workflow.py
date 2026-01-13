@@ -8,11 +8,12 @@ from gui_automation import GUI
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Enter required Google Sheet URL
 GOOGLE_SHEET_URL = "Enter your google sheet url here"
 window_mgr = WindowManager("Google Chrome", max_retries=3, wait_timeout=10.0)
 _sheet_opened = False
 
-
+# open google sheet
 def open_google_sheet() -> bool:
     global _sheet_opened
     
@@ -46,7 +47,7 @@ def open_google_sheet() -> bool:
         window_mgr.take_screenshot("chrome_open_error")
         return False
 
-
+# to ensure focus is maintained on the google sheet window
 def ensure_sheet_focus() -> bool:
     if not window_mgr.focus_application():
         logger.warning("Failed to focus Chrome application")
@@ -64,7 +65,7 @@ def type_text_to_sheet(text: str) -> bool:
     type_text(str(text))
     return True
 
-
+# find invoice row by searching invoice number
 def find_invoice_row(invoice_number: str) -> bool:
     logger.info(f"Searching for invoice number: {invoice_number}")
     
@@ -111,7 +112,7 @@ def find_invoice_row(invoice_number: str) -> bool:
             pass
         return False
 
-
+# update amount and date cells
 def update_cells(amount: str, date: str) -> bool:
     logger.info(f"Updating cells - Amount: {amount}, Date: {date}")
     
@@ -161,7 +162,7 @@ def update_cells(amount: str, date: str) -> bool:
         window_mgr.take_screenshot("update_cells_error")
         return False
 
-
+# process all invoices in google sheets
 def process_all_invoices(invoices_data: List[Dict]) -> Dict[str, bool]:
     results = {}
     
@@ -226,37 +227,37 @@ def process_all_invoices(invoices_data: List[Dict]) -> Dict[str, bool]:
     logger.info(f"Completed processing {len(invoices_data)} invoices")
     return results
 
-
-def process_invoice_google_sheet(invoice_data: Dict) -> bool:
-    invoice_number = invoice_data.get("invoice_number")
-    amount = invoice_data.get("total_amount", "")
-    date = invoice_data.get("invoice_date", "")
+# # to process a single invoice in google sheets
+# def process_invoice_google_sheet(invoice_data: Dict) -> bool:
+#     invoice_number = invoice_data.get("invoice_number")
+#     amount = invoice_data.get("total_amount", "")
+#     date = invoice_data.get("invoice_date", "")
     
-    if amount is None:
-        amount = ""
-    if date is None:
-        date = ""
+#     if amount is None:
+#         amount = ""
+#     if date is None:
+#         date = ""
     
-    amount = str(amount)
-    date = str(date)
+#     amount = str(amount)
+#     date = str(date)
     
-    if not invoice_number:
-        logger.error("Invoice number missing")
-        return False
+#     if not invoice_number:
+#         logger.error("Invoice number missing")
+#         return False
     
-    logger.info(f"Processing invoice: {invoice_number}, Amount: {amount}, Date: {date}")
+#     logger.info(f"Processing invoice: {invoice_number}, Amount: {amount}, Date: {date}")
     
-    if not ensure_sheet_focus():
-        logger.error("Sheet not focused")
-        return False
+#     if not ensure_sheet_focus():
+#         logger.error("Sheet not focused")
+#         return False
     
-    if not find_invoice_row(invoice_number):
-        logger.warning(f"Invoice {invoice_number} not found")
-        return False
+#     if not find_invoice_row(invoice_number):
+#         logger.warning(f"Invoice {invoice_number} not found")
+#         return False
     
-    if not update_cells(amount, date):
-        logger.error(f"Failed to update cells for invoice {invoice_number}")
-        return False
+#     if not update_cells(amount, date):
+#         logger.error(f"Failed to update cells for invoice {invoice_number}")
+#         return False
     
-    logger.info(f"Successfully processed invoice: {invoice_number}")
-    return True
+#     logger.info(f"Successfully processed invoice: {invoice_number}")
+#     return True

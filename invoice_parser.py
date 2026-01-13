@@ -9,7 +9,7 @@ def normalize_text(text: str) -> str:
     text = re.sub(r"\n+", "\n", text)   # collapse newlines
     return text
 
-# ---------------- Text Extraction ----------------
+# Text Extraction 
 def extract_text(pdf_path: Path) -> str:
     text = []
 
@@ -32,7 +32,7 @@ def extract_text(pdf_path: Path) -> str:
     return combined_text
 
 
-# ---------------- Invoice Number ----------------
+# Invoice Number 
 def extract_invoice_number(text: str):
     text = normalize_text(text)
 
@@ -51,7 +51,7 @@ def extract_invoice_number(text: str):
 
     return None
 
-# ---------------- Invoice Date ----------------
+#  Invoice Date 
 def extract_invoice_date(text: str):
     date_patterns = [
         r"(Invoice\s*Date|Date\s*of\s*Issue|Issue\s*Date|Order\s*Placed|Order\s*Date|Date)"
@@ -72,7 +72,7 @@ def extract_invoice_date(text: str):
     return None
 
 
-# ---------------- Amount ----------------
+#  Amount 
 def extract_total_amount(text: str):
     amount_pattern = (
         r"(Total|Grand\s*Total|Net\s*Amount|Amount|Balance\s*Due)"
@@ -91,7 +91,7 @@ def extract_total_amount(text: str):
     return str(max(amounts)) if amounts else None
 
 
-# ---------------- Main Parser ----------------
+# Main Parser 
 def parse_invoice(pdf_file: str) -> dict:
     text = extract_text(Path(pdf_file))
 
